@@ -21,6 +21,7 @@
 		<hdaoop-core.version>0.20.2</hdaoop-core.version>
 		<hdaoop-common.version>0.23.1</hdaoop-common.version>
 		<jsoup.version>1.8.1</jsoup.version>
+		<solr-solrj.version>4.10.2</solr-solrj.version>
 
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
@@ -47,7 +48,11 @@
 			<artifactId>jsoup</artifactId>
 			<version>${jsoup.version}</version>
 		</dependency>
-				
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>${solr-solrj.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
