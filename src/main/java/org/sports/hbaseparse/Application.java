@@ -8,14 +8,11 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.filter.ColumnPrefixFilter;
-import org.apache.hadoop.hbase.util.Bytes;
 
 public class Application {
 
@@ -29,12 +26,10 @@ public class Application {
 		conf.set("hbase.zookeeper.quorum", serverFQDN);
 		conf.set("hbase.zookeeper.property.clientPort", "2181");
 
-		HBaseAdmin admin = new HBaseAdmin(conf);
-
 		try {
 
 			HTable hTable = new HTable(conf, "webpage");
-			
+
 			Scan scan = new Scan();
 			scan.addColumn("f".getBytes(), "cnt".getBytes());
 			scan.setBatch(2000);
