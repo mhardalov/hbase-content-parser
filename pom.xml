@@ -20,6 +20,7 @@
 		<hbase.version>0.92.2</hbase.version>
 		<hdaoop-core.version>0.20.2</hdaoop-core.version>
 		<hdaoop-common.version>0.23.1</hdaoop-common.version>
+		<jsoup.version>1.8.1</jsoup.version>
 
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
@@ -41,6 +42,12 @@
 			<artifactId>hadoop-common</artifactId>
 			<version>${hdaoop-common.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup.version}</version>
+		</dependency>
+				
 	</dependencies>
 
 	<build>
