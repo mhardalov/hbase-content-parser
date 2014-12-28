@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.sportscrawler</groupId>
+	<artifactId>contentparser</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>hbase-content-parser</name>
+
+	<properties>
+		<start-class>org.sports.hbaseparse.Application</start-class>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<build-date>${maven.build.timestamp}</build-date>
+
+		<java.version>1.6</java.version>
+		<junit.version>4.11</junit.version>
+		<hbase.version>0.92.2</hbase.version>
+		<hdaoop-core.version>0.20.2</hdaoop-core.version>
+		<hdaoop-common.version>0.23.1</hdaoop-common.version>
+
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase</artifactId>
+			<version>${hbase.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>${hdaoop-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<version>${hdaoop-common.version}</version>
+		</dependency>
+	</dependencies>
+</project>
