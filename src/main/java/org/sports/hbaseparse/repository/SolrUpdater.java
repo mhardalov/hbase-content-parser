@@ -35,7 +35,7 @@ public class SolrUpdater {
 		// The following settings are provided here for completeness.
 		// They will not normally be required, and should only be used
 		// after consulting javadocs to know whether they are truly required.
-		server.setSoTimeout(1000); // socket read timeout
+		server.setSoTimeout(5000); // socket read timeout
 		server.setDefaultMaxConnectionsPerHost(100);
 		server.setMaxTotalConnections(100);
 		server.setFollowRedirects(false); // defaults to false
