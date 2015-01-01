@@ -13,14 +13,17 @@ import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.common.SolrInputDocument;
 
 public class SolrUpdater {
-	final String urlSolr = "http://localhost:8983/solr/sports";
+	private final String urlSolr = "http://localhost:8983/solr/sports";
 
 	private Collection<SolrInputDocument> documents;
-	SolrServer server;
+	private SolrServer server;
 	
-	public SolrUpdater() {
+	private int commitCount; 
+	
+	public SolrUpdater(int commitCount) {
 		this.documents = new ArrayList<SolrInputDocument>();
 		this.server = this.getSolrServer();
+		this.commitCount = 250;
 	}
 	
 	private SolrServer getSolrServer() {
@@ -71,7 +74,7 @@ public class SolrUpdater {
 		
 		this.documents.add(doc);
 
-		if (documents.size() % 250 == 0) {
+		if (documents.size() % this.commitCount == 0) {
 			this.commitDocuments();
 		}
 	}

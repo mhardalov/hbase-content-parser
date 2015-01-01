@@ -1,5 +1,8 @@
 package org.sports.hbaseparse;
 
+import java.net.URL;
+import java.text.SimpleDateFormat; 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,14 +19,19 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.sports.hbaseparse.interfaces.IHtmlValuesParser;
+import org.sports.hbaseparse.parserUtils.BaseValuesParser;
 import org.sports.hbaseparse.parserUtils.ContentParser;
+import org.sports.hbaseparse.parserUtils.CustomDateTimeParser;
 import org.sports.hbaseparse.repository.SolrUpdater;
+import org.sports.hbaseparse.repository.SportalValuesParser;
 
 public class Application {
 
 	public static void main(String[] args) throws MasterNotRunningException,
 			ZooKeeperConnectionException {
 		final String serverFQDN = "localhost";
+		final int commitCount = 250;
 
 		Configuration conf = HBaseConfiguration.create();
 
@@ -40,36 +48,44 @@ public class Application {
 
 				Scan scan = new Scan();
 				scan.addColumn("f".getBytes(), "cnt".getBytes());
+				scan.addColumn("f".getBytes(), "bas".getBytes());
 				scan.setBatch(2000);
+				scan.setCaching(2000);
 
-				SolrUpdater solrUpd = new SolrUpdater();
+				SolrUpdater solrUpd = new SolrUpdater(commitCount);
 				ResultScanner scanner = hTable.getScanner(scan);
 				Iterator<Result> resultsIter = scanner.iterator();
 				while (resultsIter.hasNext()) {
 
 					Result result = resultsIter.next();
 					String key = Bytes.toString(result.getRow());
+					String urlString = Bytes.toString(result.getValue("f".getBytes(),
+							"bas".getBytes()));
+					URL url = new URL(urlString);
+					byte[] html = result.getValue("f".getBytes(),
+							"cnt".getBytes());
 
-					List<KeyValue> values = result.list();
-					for (KeyValue value : values) {
+					String pureHtml = new String(html, "UTF-8");
+					IHtmlValuesParser valuesExtracter = new SportalValuesParser(
+							pureHtml);
 
-						String pureHtml = new String(value.getValue(), "UTF-8");
+					Map<String, Object> parsedValues = valuesExtracter
+							.parseHtml(pureHtml);
 
-						ContentParser cp = new ContentParser(pureHtml);
-						String category = cp
-								.getCategory("h1.printing_large_text_toolbar > strong");
-						String content = cp.getContent("div#news_content");
-
+					if (parsedValues != null) {
 						Map<String, Object> updValues = new HashMap<String, Object>();
+						updValues.putAll(parsedValues);
+						updValues.put("url", url.toString());
 						updValues.put("id", key);
-						updValues.put("content", content);
-						updValues.put("category", category);
+						updValues.put("host", url.getHost());
 						
 						solrUpd.updateEntry(updValues);
-						break;
+					} else {
+						System.out.println("Skipping " + url);
 					}
+
 				}
-				
+
 				solrUpd.commitDocuments();
 			} finally {
 				if (hTable != null) {
