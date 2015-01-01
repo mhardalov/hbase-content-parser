@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public final class CustomDateTimeParser {
 
 	private static int getMonth(String bgMonthString) {
-		int result = -1;
+		int result;
 		switch (bgMonthString.toLowerCase()) {
 		case "януари":
 			result =  1;
