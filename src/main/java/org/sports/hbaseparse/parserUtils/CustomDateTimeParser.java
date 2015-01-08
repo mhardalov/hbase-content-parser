@@ -1,6 +1,6 @@
 package org.sports.hbaseparse.parserUtils;
 
- import java.util.Calendar;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,45 +11,45 @@ public final class CustomDateTimeParser {
 		int result;
 		switch (bgMonthString.toLowerCase()) {
 		case "януари":
-			result =  1;
+			result = 1;
 			break;
 		case "февруари":
-			result =  2;
+			result = 2;
 			break;
 		case "март":
-			result =  3;
+			result = 3;
 			break;
 		case "април":
-			result =  4;
+			result = 4;
 			break;
 		case "май":
-			result =  5;
+			result = 5;
 			break;
 		case "юни":
-			result =  6;
+			result = 6;
 			break;
 		case "юли":
-			result =  7;
+			result = 7;
 			break;
 		case "август":
-			result =  8;
+			result = 8;
 			break;
 		case "септември":
-			result =  9;
+			result = 9;
 			break;
 		case "октомври":
-			result =  10;
+			result = 10;
 			break;
 		case "ноември":
-			result =  11;
+			result = 11;
 			break;
 		case "декември":
-			result =  12;
+			result = 12;
 			break;
 		default:
 			throw new IllegalArgumentException("Invalid month string.");
 		}
-		
+
 		return result;
 	}
 
