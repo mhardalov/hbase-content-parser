@@ -22,10 +22,10 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.sports.gate.GateSportsApplication;
-import org.sports.gate.model.DocumentModel;
 import org.sports.hbaseparse.interfaces.IHtmlValuesParser;
 import org.sports.hbaseparse.repository.SolrUpdater;
 import org.sports.hbaseparse.repository.SportalValuesParser;
+import org.sports.ontology.model.DocumentModel;
 
 public class Application {
 
@@ -82,7 +82,6 @@ public class Application {
 				SolrUpdater solrUpd = new SolrUpdater(commitCount);
 				ResultScanner scanner = hTable.getScanner(scan);
 				Iterator<Result> resultsIter = scanner.iterator();
-				int count = 0;
 
 				while (resultsIter.hasNext()) {
 
@@ -118,11 +117,6 @@ public class Application {
 					} else {
 						System.out.println("Skipping " + url);
 					}
-
-					count++;
-					System.out.println("Count: " + count);
-					if (count > 1500)
-						break;
 				}
 
 				solrUpd.commitDocuments();
