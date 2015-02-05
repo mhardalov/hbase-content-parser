@@ -1,9 +1,16 @@
 package org.sports.hbaseparse;
 
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -14,11 +21,41 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.sports.gate.GateSportsApplication;
+import org.sports.gate.model.DocumentModel;
 import org.sports.hbaseparse.interfaces.IHtmlValuesParser;
 import org.sports.hbaseparse.repository.SolrUpdater;
 import org.sports.hbaseparse.repository.SportalValuesParser;
 
 public class Application {
+
+	private static List<DocumentModel> documents = new ArrayList<DocumentModel>();
+
+	private static void addDocument(String key, URL url,
+			Map<String, Object> parsedValues) throws ParseException, Exception {
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		df.setTimeZone(tz);
+		Date docDate = df.parse(parsedValues.get("tstamp").toString());
+
+		DocumentModel docModel = new DocumentModel();
+		docModel.setKey(key);
+		docModel.setUrl(url.toString());
+		docModel.setContent(parsedValues.get("content").toString());
+		docModel.setDate(docDate);
+
+		documents.add(docModel);
+	}
+
+	private static void annotate() {
+		try {
+			GateSportsApplication.annotate(documents);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		documents.clear();
+	}
 
 	public static void main(String[] args) throws MasterNotRunningException,
 			ZooKeeperConnectionException {
@@ -45,6 +82,8 @@ public class Application {
 				SolrUpdater solrUpd = new SolrUpdater(commitCount);
 				ResultScanner scanner = hTable.getScanner(scan);
 				Iterator<Result> resultsIter = scanner.iterator();
+				int count = 0;
+
 				while (resultsIter.hasNext()) {
 
 					Result result = resultsIter.next();
@@ -63,6 +102,7 @@ public class Application {
 							.parseHtml(pureHtml);
 
 					if (parsedValues != null) {
+
 						Map<String, Object> updValues = new HashMap<String, Object>();
 						updValues.putAll(parsedValues);
 						updValues.put("url", url.toString());
@@ -70,13 +110,23 @@ public class Application {
 						updValues.put("host", url.getHost());
 
 						solrUpd.updateEntry(updValues);
+						addDocument(key, url, updValues);
+
+						if (solrUpd.doCommit()) {
+							annotate();
+						}
 					} else {
 						System.out.println("Skipping " + url);
 					}
 
+					count++;
+					System.out.println("Count: " + count);
+					if (count > 1500)
+						break;
 				}
 
 				solrUpd.commitDocuments();
+				annotate();
 			} finally {
 				if (hTable != null) {
 					hTable.close();

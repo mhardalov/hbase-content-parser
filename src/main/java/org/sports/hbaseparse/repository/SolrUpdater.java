@@ -13,17 +13,17 @@ import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.common.SolrInputDocument;
 
 public class SolrUpdater {
-	private final String urlSolr = "http://localhost:8983/solr/sports";
+	private final String urlSolr = "http://localhost:8983/solr/nutch";
 
 	private Collection<SolrInputDocument> documents;
 	private SolrServer server;
 	
-	private int commitCount; 
+	private final int commitCount; 
 	
 	public SolrUpdater(int commitCount) {
 		this.documents = new ArrayList<SolrInputDocument>();
 		this.server = this.getSolrServer();
-		this.commitCount = 250;
+		this.commitCount = commitCount;
 	}
 	
 	private SolrServer getSolrServer() {
@@ -47,6 +47,10 @@ public class SolrUpdater {
 		server.setAllowCompression(true);
 
 		return server;
+	}
+	
+	public boolean doCommit() {
+		return documents.size() % this.commitCount == 0;
 	}
 	
 	public void commitDocuments() throws SolrServerException, IOException {
@@ -74,7 +78,7 @@ public class SolrUpdater {
 		
 		this.documents.add(doc);
 
-		if (documents.size() % this.commitCount == 0) {
+		if (this.doCommit()) {
 			this.commitDocuments();
 		}
 	}
