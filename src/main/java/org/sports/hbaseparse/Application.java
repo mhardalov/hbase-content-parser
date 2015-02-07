@@ -1,64 +1,35 @@
 package org.sports.hbaseparse;
 
 import java.net.URL;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.MasterNotRunningException;
-import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.sports.gate.GateSportsApplication;
 import org.sports.hbaseparse.interfaces.IHtmlValuesParser;
+import org.sports.hbaseparse.repository.GateAnnotationsBuilder;
 import org.sports.hbaseparse.repository.SolrUpdater;
 import org.sports.hbaseparse.repository.SportalValuesParser;
-import org.sports.ontology.model.DocumentModel;
 
 public class Application {
 
-	private static List<DocumentModel> documents = new ArrayList<DocumentModel>();
+	private static void gateAnnotate(int commitCount) throws ParseException,
+			Exception {
+		GateAnnotationsBuilder builder = new GateAnnotationsBuilder();
 
-	private static void addDocument(String key, URL url,
-			Map<String, Object> parsedValues) throws ParseException, Exception {
-		TimeZone tz = TimeZone.getTimeZone("UTC");
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		df.setTimeZone(tz);
-		Date docDate = df.parse(parsedValues.get("tstamp").toString());
+		builder.query(commitCount);
 
-		DocumentModel docModel = new DocumentModel();
-		docModel.setKey(key);
-		docModel.setUrl(url.toString());
-		docModel.setContent(parsedValues.get("content").toString());
-		docModel.setDate(docDate);
-
-		documents.add(docModel);
 	}
 
-	private static void annotate() {
-		try {
-			GateSportsApplication.annotate(documents);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		documents.clear();
-	}
+	public static void main(String[] args) throws ParseException, Exception {
 
-	public static void main(String[] args) throws MasterNotRunningException,
-			ZooKeeperConnectionException {
 		final String serverFQDN = "localhost";
 		final int commitCount = 250;
 
@@ -109,23 +80,19 @@ public class Application {
 						updValues.put("host", url.getHost());
 
 						solrUpd.updateEntry(updValues);
-						addDocument(key, url, updValues);
-
-						if (solrUpd.doCommit()) {
-							annotate();
-						}
 					} else {
 						System.out.println("Skipping " + url);
 					}
 				}
 
 				solrUpd.commitDocuments();
-				annotate();
 			} finally {
 				if (hTable != null) {
 					hTable.close();
 				}
 			}
+
+			gateAnnotate(commitCount);
 		} catch (Exception ex) {
 			System.out.println("Error caught.");
 			ex.printStackTrace();
