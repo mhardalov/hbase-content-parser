@@ -115,7 +115,10 @@ public class GateAnnotationsBuilder {
 			
 			this.annotate();
 			
-			round++;			
+			round++;
+			System.out.printf("Annoteted %d documents.\n", round * commitCount);
+			
+			
 		} while (maxCount > start);
 	}
 
